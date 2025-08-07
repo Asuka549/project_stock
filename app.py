@@ -6,16 +6,17 @@ import matplotlib.font_manager as fm
 import pandas as pd
 from stock import fetch_stock_data
 import os
-import urllib.request
 
-# 使用本地字型（已隨專案一併部署）
+# ========== ✅ 載入中文字型 ==========
 font_path = os.path.join(".streamlit", "fonts", "NotoSansTC-Regular.otf")
 if os.path.exists(font_path):
     font_prop = fm.FontProperties(fname=font_path)
-    matplotlib.rcParams["font.family"] = font_prop.get_name()
     st.write(f"✅ 成功載入中文字型：{font_prop.get_name()}")
 else:
+    font_prop = None
     st.warning("⚠️ 找不到中文字型，圖表中文字可能無法正確顯示。")
+
+# ===================================
 
 st.set_page_config(layout="wide")
 st.title("📈 台股技術指標視覺化平台")
@@ -47,10 +48,6 @@ if st.sidebar.button("開始繪製"):
     if df.empty:
         st.error("找不到資料，請確認股票代號與時間範圍。")
     else:
-
-        st.write("📦 抓到資料筆數：", len(df))
-        st.dataframe(df.head())
-
         # 計算技術指標
         if "移動平均線" in indicator:
             df['SMA20'] = df['Close'].rolling(window=20).mean()
@@ -61,7 +58,7 @@ if st.sidebar.button("開始繪製"):
             df['UpperB'] = df['20SMA'] + 2 * df['20STD']
             df['LowerB'] = df['20SMA'] - 2 * df['20STD']
 
-        # 畫圖
+        # === 畫圖（強制用中文字型）===
         fig, ax = plt.subplots(figsize=(14, 6))
         ax.plot(df.index, df['Close'], label='收盤價', color='black')
 
@@ -73,12 +70,15 @@ if st.sidebar.button("開始繪製"):
             ax.plot(df.index, df['UpperB'], label='上布林帶', color='red', linestyle=':')
             ax.plot(df.index, df['LowerB'], label='下布林帶', color='red', linestyle=':')
 
-        ax.set_title(f"{stock_no} 技術分析圖")
-        ax.set_xlabel("日期")
-        ax.set_ylabel("股價")
+        # ✅ 中文標籤統一使用 font_prop
+        ax.set_title(f"{stock_no} 技術分析圖", fontproperties=font_prop)
+        ax.set_xlabel("日期", fontproperties=font_prop)
+        ax.set_ylabel("股價", fontproperties=font_prop)
+        ax.legend(prop=font_prop)
+        plt.xticks(rotation=30, fontproperties=font_prop)
+        plt.yticks(fontproperties=font_prop)
         ax.grid(True)
-        ax.legend()
-        plt.xticks(rotation=30)
+
         st.pyplot(fig)
 
         # 顯示資料表（可選）
