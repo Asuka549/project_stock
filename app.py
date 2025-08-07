@@ -6,14 +6,17 @@ import matplotlib.font_manager as fm
 import pandas as pd
 from stock import fetch_stock_data
 import os
+import urllib.request
 
-# 設定中文字型（從 .streamlit/fonts 資料夾）
-font_path = os.path.join(".streamlit", "fonts", "NotoSansTC-Regular.otf")
-if os.path.exists(font_path):
-    font_prop = fm.FontProperties(fname=font_path)
-    matplotlib.rcParams["font.family"] = font_prop.get_name()
-else:
-    st.warning("⚠️ 找不到中文字型，圖表中文字可能無法正確顯示。")
+font_url = "https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/TraditionalChinese/NotoSansTC-Regular.otf"
+font_path = "/tmp/NotoSansTC-Regular.otf"
+
+if not os.path.exists(font_path):
+    urllib.request.urlretrieve(font_url, font_path)
+
+# 註冊並設定為 matplotlib 預設字體
+font_prop = fm.FontProperties(fname=font_path)
+matplotlib.rcParams["font.family"] = font_prop.get_name()
 
 st.set_page_config(layout="wide")
 st.title("📈 台股技術指標視覺化平台")
