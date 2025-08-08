@@ -2,4 +2,4 @@ streamlit
 pandas
 matplotlib
 requests
-mplfinance>=0.12.10b1
+mplfinance
